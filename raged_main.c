@@ -429,8 +429,8 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 			}
 		case OP_MEDIA_DEL: /* server should never get this */
 			{
-				ID_Item* item = e->data;
-				_store->item_del(item);
+				const char* path = e->data;
+				_store->item_del(path);
 				break;
 			}
 			

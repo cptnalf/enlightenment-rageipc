@@ -37,9 +37,9 @@ static void _media_add(Rage_Ipc_VolItem* item)
 	volume_item_free(vol);
 }
 
-static void _media_del(ID_Item* item)
+static void _media_del(const char* path)
 {
-	
+	database_video_file_del(db, path);
 }
 
 static Rage_Ipc_VolItem* _media_details_get(ID_Item* item)
