@@ -16,8 +16,8 @@ struct _Media_Storage
 	Eina_Bool (*init)(void* data);
 	void (*shutdown)();
 	
-	void (*item_add)(Rage_Ipc_VolItem* item);
-	void (*item_del)(const char* item);
+	Eina_Bool (*item_add)(Rage_Ipc_VolItem* item);
+	Eina_Bool (*item_del)(const char* item);
 	Rage_Ipc_VolItem* (*item_details_get)(ID_Item* item);
 	
 	Genre_Result* (*genre_list)(const char* genre);

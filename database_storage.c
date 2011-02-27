@@ -27,7 +27,7 @@ static void _shutdown()
 	if (db) { database_free(db); }
 }
 
-static void _media_add(Rage_Ipc_VolItem* item)
+static Eina_Bool _media_add(Rage_Ipc_VolItem* item)
 {
 	Volume_Item* vol;
 	printf("adding %s:%s %ld\n", item->genre, item->name, item->created_date);
@@ -35,11 +35,15 @@ static void _media_add(Rage_Ipc_VolItem* item)
 	vol = volume_item_new(0, item->path, item->name, item->genre, item->type);
 	database_video_file_add(db, vol);
 	volume_item_free(vol);
+	
+	return EINA_TRUE;
 }
 
-static void _media_del(const char* path)
+static Eina_Bool _media_del(const char* path)
 {
+	printf("deleting %s\n", path);
 	database_video_file_del(db, path);
+	return EINA_TRUE;
 }
 
 static Rage_Ipc_VolItem* _media_details_get(ID_Item* item)

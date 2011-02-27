@@ -188,13 +188,13 @@ DBIterator* database_video_files_get(Database* db, const char* where_part, const
 		" MAX(ph.playedDate) AS lastPlayed "
 		"FROM video_files AS v "
 		"LEFT JOIN PlayHistory AS ph ON ph.path = v.path "
-		"WHERE v.f_type = 'video' ";
+		"WHERE ";
 	
 	if (! orderby_part)
 		{
 			orderby_part = "ORDER BY v.title, v.path ";
 		}
-	if (! where_part) { where_part = " "; }
+	if (! where_part) { where_part = " v.f_type = 'video' "; }
 	
 	snprintf(query, sizeof(query), 
 					 "%s %s GROUP BY v.path, v.title %s ",
@@ -223,7 +223,7 @@ DBIterator* database_video_files_id_get(Database* db, const long long id)
 {
 	DBIterator* it;
 	char buf[128];
-	snprintf(buf, sizeof(buf), " AND v.ID = %lld ", id);
+	snprintf(buf, sizeof(buf), " v.f_type = 'video' AND v.ID = %lld ", id);
 	it = database_video_files_get(db, buf, NULL);
 	return it;
 }
@@ -238,7 +238,7 @@ DBIterator* database_video_files_path_search(Database* db, const char* path)
 	DBIterator* it;
 	char* where_part;
 	
-	where_part = sqlite3_mprintf("AND v.path like '%q%s' ", path, "%") ;
+	where_part = sqlite3_mprintf(" v.path like '%q%s' ", path, "%") ;
 	
 	it = database_video_files_get(db, where_part, NULL);
 	sqlite3_free(where_part);
@@ -256,7 +256,7 @@ DBIterator* database_video_files_genre_search(Database* db, const char* genre)
 	DBIterator* it;
 	char* query;
 	
-	query = sqlite3_mprintf("AND v.genre = '%q' ", genre);
+	query = sqlite3_mprintf(" v.f_type = 'video' AND v.genre = '%q' ", genre);
 	
 	it = database_video_files_get(db, query, NULL);
 	sqlite3_free(query);
@@ -271,7 +271,7 @@ DBIterator* database_video_files_genre_search(Database* db, const char* genre)
  */
 DBIterator* database_video_favorites_get(Database* db)
 {
- 	const char* where_clause = "AND playCount > 0 ";
+ 	const char* where_clause = " v.f_type = 'video' AND playCount > 0 ";
 	const char* orderby_part = 
 		"ORDER BY playCount DESC, v.title, v.path "
 		"LIMIT 50";
@@ -289,7 +289,7 @@ DBIterator* database_video_recents_get(Database* db)
 	const char* orderby_clause = 
 		"ORDER BY lastPlayed DESC, v.title, v.path "
 		" LIMIT 50";
-	return database_video_files_get(db, NULL, orderby_clause);
+	return database_video_files_get(db, " v.f_type = 'video' " , orderby_clause);
 }
 
 DBIterator* database_video_news_get(Database* db)
@@ -297,7 +297,7 @@ DBIterator* database_video_news_get(Database* db)
 	const char* where_clause =
 		"ORDER BY v.createdDate DESC, v.title, v.path "
 		" LIMIT 50 " ;
-	return database_video_files_get(db, NULL, where_clause) ;
+	return database_video_files_get(db, " v.f_type = 'video' ", where_clause) ;
 }
 
 static void* _genre_next(DBIterator* it)

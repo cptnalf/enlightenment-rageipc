@@ -417,23 +417,10 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 				}
 			break;
 		case OP_MEDIA_ADD: /* server should never get this */
-			{
-				Rage_Ipc_VolItem* item = e->data;
-				
-				if (e->size != sizeof(struct _Rage_Ipc_VolItem)) { printf("wrongsize!\n"); }
-				else
-					{
-						_store->item_add(item);
-					}
-				break;
-			}
+			break;
 		case OP_MEDIA_DEL: /* server should never get this */
-			{
-				const char* path = e->data;
-				_store->item_del(path);
-				break;
-			}
-			
+			break;
+
 		case (OP_MEDIA_DETAILS_GET):
 			{
 				ID_Item* item = e->data;
@@ -478,11 +465,41 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 		case OP_MEDIA_GET_DATA: /* server should never get this */
 			break;
 		case OP_MEDIA_PUT:
+			{
+				Rage_Ipc_VolItem* item = e->data;
+				
+				if (e->size != sizeof(struct _Rage_Ipc_VolItem)) { printf("wrongsize!\n"); }
+				else
+					{
+						if (_store->item_add(item))
+							{
+								Eina_List* l;
+								Client* nd1;
+								
+								EINA_LIST_FOREACH(_clients, l, nd1)
+									{
+										if (nd1 != cl && nd1->client)
+											{
+												printf("sending add notification.\n");
+												ecore_ipc_client_send(nd1->client, OP_MEDIA_ADD, 0,
+																							0, 0, 0,
+																							item, sizeof(Rage_Ipc_VolItem));
+											}
+									}
+							}
+					}
+				break;
+			}
 			break;
 		case OP_MEDIA_PUT_DATA:
 			break;
 		case OP_MEDIA_DELETE:
-			break;
+			{
+				const char* path = e->data;
+				_store->item_del(path);
+				break;
+			}
+			
 		case OP_THUMB_GET:
 			break;
 		case OP_THUMB_GET_DATA: /* server should never get this */
