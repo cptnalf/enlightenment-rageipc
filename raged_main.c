@@ -473,9 +473,9 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 					{
 						if (_store->item_add(item))
 							{
+#if 0
 								Eina_List* l;
 								Client* nd1;
-								
 								EINA_LIST_FOREACH(_clients, l, nd1)
 									{
 										if (nd1 != cl && nd1->client)
@@ -486,6 +486,7 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 																							item, sizeof(Rage_Ipc_VolItem));
 											}
 									}
+#endif
 							}
 					}
 				break;
@@ -512,11 +513,11 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 
 
 static int
-_server_init(void)
+_server_init(const char* host, const int port)
 {
 	_server_local = ecore_ipc_server_add(ECORE_IPC_LOCAL_USER, "rage", 0, NULL);
 	if (!_server_local) return 0;
-	_server_remote = ecore_ipc_server_add(ECORE_IPC_REMOTE_SYSTEM, "localhost", 9889, NULL);
+	_server_remote = ecore_ipc_server_add(ECORE_IPC_REMOTE_SYSTEM, host, port, NULL);
 	if (!_server_remote)
 		{
 			ecore_ipc_server_del(_server_local);
@@ -546,6 +547,8 @@ _server_shutdown(void)
 			_server_remote = NULL;
 		}
 }
+
+#ifndef _SERVER_
 
 static int _client_init()
 {
@@ -610,16 +613,26 @@ static Eina_Bool _genre_query(void* data)
 	
 	return EINA_FALSE;
 }
+#endif
 
 int
 main(int argc, char **argv)
 {
 	char * dbPath;
+	char* host;
+	int port = 9889;
 
-	if (argc < 2) { printf("need arg: raged <path to database>\n"); exit(1); return 0; }
+	if (argc < 3) { printf("need arg: raged <path to database> <hostname> \n"); exit(1); return 0; }
 	
 	dbPath = argv[1];
-
+	host = argv[2];
+	
+	printf("raged ipc server \n");
+	printf("version %s\n", VERSION);
+	printf("(c) salfors\n");
+	printf("rageipc://%s:%d\n", host, port);
+	printf("using database=%s\n", dbPath);
+	
 	eet_init();
 	ecore_init();
 	ecore_file_init();
@@ -629,7 +642,7 @@ main(int argc, char **argv)
 	ecore_app_args_set(argc, (const char **)argv);
 	
 #ifdef _SERVER_
-	if (!_server_init())
+	if (!_server_init(host, port))
 		{
 			printf("Raged: ERROR - cannot listen on sockets\n");
 			exit(-1);
