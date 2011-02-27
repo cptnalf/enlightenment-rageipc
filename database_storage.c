@@ -67,18 +67,21 @@ static Rage_Ipc_VolItem* _media_details_get(ID_Item* item)
 	return res;
 }
 
-static Genre_Result* _genre_list()
+static Genre_Result* _genre_list(const char* filter)
 {
-	Genre_Result* gr;
+	Genre_Result* gr = NULL;
 	Eina_List* lst = NULL;
 	Genre* g = NULL;
 	unsigned int len = 0;
 	
 	DBIterator* db_it;
-	db_it = database_video_genres_get(db, NULL);
+	db_it = database_video_genres_get(db, filter);
+	
+	printf("filter: %s\n", filter);
 	
 	if (db_it)
 		{
+			printf("foo!\n");
 			g = database_iterator_next(db_it);
 			while(g)
 				{
@@ -90,10 +93,12 @@ static Genre_Result* _genre_list()
 			
 			len = eina_list_count(lst);
 			gr = calloc(1, sizeof(Genre_Result) + len * sizeof(Genre_Result_Item));
-			
-			memset(gr, 0, sizeof(Genre_Result) + len * sizeof(Genre_Result_Item));
-			gr->size = sizeof(Genre_Result) + len * sizeof(Genre_Result_Item);
-			gr->count = len;
+			if (gr)
+				{
+					memset(gr, 0, sizeof(Genre_Result) + len * sizeof(Genre_Result_Item));
+					gr->size = sizeof(Genre_Result) + len * sizeof(Genre_Result_Item);
+					gr->count = len;
+				}
 			
 			{
 				Eina_List* ptr;
@@ -102,9 +107,12 @@ static Genre_Result* _genre_list()
 				
 				EINA_LIST_FOREACH(lst, ptr, gPtr)
 					{
-						strncpy(gr->recs[i].label, gPtr->label, sizeof(gr->recs[i].label));
-						gr->recs[i].count = gPtr->count;
-						++i;
+						if (gr)
+							{
+								strncpy(gr->recs[i].label, gPtr->label, sizeof(gr->recs[i].label));
+								gr->recs[i].count = gPtr->count;
+								++i;
+							}
 						
 						eina_stringshare_del(gPtr->label);
 						free(gPtr);

@@ -447,9 +447,10 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 			
 		case (OP_GENRES_GET):
 			{
-				Genre_Result* items = _store->genre_list();
+				printf("get genres '%s'\n", (const char*) e->data);
+				Genre_Result* items = _store->genre_list(e->data);
 				ecore_ipc_client_send(cl->client, OP_GENRE_LIST, 0, 0, 0, 0, 
-															items, items->size);
+															items, (items ? items->size : 0));
 				free(items);
 				break; 
 			}
@@ -458,7 +459,8 @@ _server_cb_data(void *data __UNUSED__, int type __UNUSED__, void *event)
 				Query_Result* items = _store->media_query((MQ_Type)e->minor, e->data, e->size);
 				
 				ecore_ipc_client_send(cl->client, OP_MEDIA_LIST, 0,
-																		0, 0, 0, items, items->size);
+															0, 0, 0, 
+															items, (items ? items->size : 0));
 				free(items);
 				break;
 			}

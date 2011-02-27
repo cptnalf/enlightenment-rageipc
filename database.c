@@ -327,7 +327,7 @@ DBIterator* database_video_genres_get(Database* db, const char* genre)
 			if (genre[0] != 0)
 				{
 					/* not an empty string. */
-					if (!strncmp("anime", genre, 5))
+					if (!strcmp("anime", genre))
 						{
 							query = 
 								"SELECT genre, count(path) "
@@ -336,7 +336,7 @@ DBIterator* database_video_genres_get(Database* db, const char* genre)
 								"GROUP BY genre "
 								"ORDER BY genre";
 						}
-					else if (!strncmp("movies", genre, 6))
+					else if (!strcmp("movies", genre))
 						{
 							query = 
 								"SELECT genre, count(path) "

@@ -17,10 +17,10 @@ struct _Media_Storage
 	void (*shutdown)();
 	
 	void (*item_add)(Rage_Ipc_VolItem* item);
-	void (*item_del)(ID_Item* item);
+	void (*item_del)(const char* item);
 	Rage_Ipc_VolItem* (*item_details_get)(ID_Item* item);
 	
-	Genre_Result* (*genre_list)();
+	Genre_Result* (*genre_list)(const char* genre);
 	Query_Result* (*media_query)(MQ_Type query_type, void* data, int size);
 };
 
